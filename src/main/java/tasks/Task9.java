@@ -30,7 +30,7 @@ public class Task9 {
     return persons.stream().skip(1).map(Person::firstName).collect(Collectors.toList());
   }
 
-  // Зачем-то нужны различные имена этих же персон (без учета фальшивой разумеется)
+  // Зачем-то нужны различные имена этих же персон без учета фальшивой разумеется
   public Set<String> getDifferentNames(List<Person> persons) {
     //Здесь distinct(), так как Collectors.toSet() уже выдаёт уникальные элементы
     return persons.stream().skip(1).map(Person::firstName).collect(Collectors.toSet());
