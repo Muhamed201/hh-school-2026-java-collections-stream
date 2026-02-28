@@ -26,16 +26,14 @@ public class Task9 {
   // Костыль, эластик всегда выдает в топе "фальшивую персону".
   // Конвертируем начиная со второй
   public List<String> getNames(List<Person> persons) {
-    if (persons.size() == 0) {
-      return Collections.emptyList();
-    }
-    persons.remove(0);
-    return persons.stream().map(Person::firstName).collect(Collectors.toList());
+    // Так нам не придеться менять исходный список
+    return persons.stream().skip(1).map(Person::firstName).collect(Collectors.toList());
   }
 
   // Зачем-то нужны различные имена этих же персон (без учета фальшивой разумеется)
   public Set<String> getDifferentNames(List<Person> persons) {
-    return getNames(persons).stream().distinct().collect(Collectors.toSet());
+    //Здесь distinct(), так как Collectors.toSet() уже выдаёт уникальные элементы
+    return persons.stream().skip(1).map(Person::firstName).collect(Collectors.toSet());
   }
 
   // Тут фронтовая логика, делаем за них работу - склеиваем ФИО
@@ -49,15 +47,15 @@ public class Task9 {
       result += " " + person.firstName();
     }
 
-    if (person.secondName() != null) {
-      result += " " + person.secondName();
+    if (person.middleName() != null) { // было дублирование secondName
+      result += " " + person.middleName();
     }
     return result;
   }
 
   // словарь id персоны -> ее имя
   public Map<Integer, String> getPersonNames(Collection<Person> persons) {
-    Map<Integer, String> map = new HashMap<>(1);
+    Map<Integer, String> map = new HashMap<>(persons.size()); // указали реальный размер
     for (Person person : persons) {
       if (!map.containsKey(person.id())) {
         map.put(person.id(), convertPersonToString(person));
@@ -68,23 +66,27 @@ public class Task9 {
 
   // есть ли совпадающие в двух коллекциях персоны?
   public boolean hasSamePersons(Collection<Person> persons1, Collection<Person> persons2) {
-    boolean has = false;
-    for (Person person1 : persons1) {
-      for (Person person2 : persons2) {
-        if (person1.equals(person2)) {
-          has = true;
-        }
+    // воспользуемся Hashset, т.к. у него временная сложность O(1)
+    // тем самым избавимся от одного цикла
+    Set<Person> persons1Set = new HashSet<>(persons1);
+    for (Person person2 : persons2) {
+      if (persons1Set.contains(person2)) {
+        return true; // нашли совпадение - сразу выходим
       }
     }
-    return has;
+    return false; //если не нашли false
+    // еще нашел такой метод return !Collections.disjoint(persons1, persons2);, но так вообще неинтересно
+
   }
 
   // Посчитать число четных чисел
   public long countEven(Stream<Integer> numbers) {
-    count = 0;
-    numbers.filter(num -> num % 2 == 0).forEach(num -> count++);
-    return count;
-  }
+    return numbers.filter(num -> num % 2 == 0)
+            .count();
+    // не совсем уверен здесь, но как я понял, не рекомендуется изменять общую переменную
+    // в общем, в прошлом случае возникают сложности с отладкой в большой программе
+    // и трудности при поиске ошибок
+    }
 
   // Загадка - объясните почему assert тут всегда верен
   // Пояснение в чем соль - мы перетасовали числа, обернули в HashSet, а toString() у него вернул их в сортированном порядке
@@ -95,4 +97,8 @@ public class Task9 {
     Set<Integer> set = new HashSet<>(integers);
     assert snapshot.toString().equals(set.toString());
   }
+  //assert всегда верен, потому что хеш-код Integer
+  // равен самому числу, поэтому все числа от 1 до 10000 попадают в уникальные бакеты,
+  // индексы которых совпадают с числами. HashSet обходит бакеты по возрастанию индексов,
+  // поэтому метод toString() возвращает числа в упорядоченном виде
 }

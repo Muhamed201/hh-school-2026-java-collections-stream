@@ -6,6 +6,7 @@ import common.PersonConverter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /*
 Задача 5
@@ -23,6 +24,12 @@ public class Task5 {
   }
 
   public List<ApiPersonDto> convert(List<Person> persons, Map<Integer, Integer> personAreaIds) {
-    return new ArrayList<>();
+    return persons.stream()
+            // Для каждого человека получаем areaId из словаря по его id
+            .map(person -> {
+              Integer areaId = personAreaIds.get(person.id()); // может быть null, если id нет в мапе
+              return personConverter.convert(person, areaId);
+            })
+            .collect(Collectors.toList());
   }
 }
