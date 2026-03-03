@@ -24,12 +24,10 @@ public class Task5 {
   }
 
   public List<ApiPersonDto> convert(List<Person> persons, Map<Integer, Integer> personAreaIds) {
-    return persons.stream()
-            // Для каждого человека получаем areaId из словаря по его id
-            .map(person -> {
-              Integer areaId = personAreaIds.get(person.id()); // может быть null, если id нет в мапе
-              return personConverter.convert(person, areaId);
-            })
-            .collect(Collectors.toList());
+      return persons.stream()
+              .map(person -> personConverter.convert(person, personAreaIds.get(person.id())))
+              .collect(Collectors.toList());
+      //Только вот вопрос
+      //Везде ли надо проверять на null
   }
 }

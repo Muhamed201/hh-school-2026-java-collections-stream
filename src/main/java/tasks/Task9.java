@@ -1,14 +1,8 @@
 package tasks;
 
 import common.Person;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
@@ -32,25 +26,14 @@ public class Task9 {
 
   // Зачем-то нужны различные имена этих же персон без учета фальшивой разумеется
   public Set<String> getDifferentNames(List<Person> persons) {
-    //Здесь distinct(), так как Collectors.toSet() уже выдаёт уникальные элементы
-    return persons.stream().skip(1).map(Person::firstName).collect(Collectors.toSet());
+    return new HashSet<>(getNames(persons)); //теперь надо менять логику только в одном месте
   }
 
   // Тут фронтовая логика, делаем за них работу - склеиваем ФИО
   public String convertPersonToString(Person person) {
-    String result = "";
-    if (person.secondName() != null) {
-      result += person.secondName();
-    }
-
-    if (person.firstName() != null) {
-      result += " " + person.firstName();
-    }
-
-    if (person.middleName() != null) { // было дублирование secondName
-      result += " " + person.middleName();
-    }
-    return result;
+    return Stream.of(person.secondName(), person.firstName(), person.middleName())
+            .filter(Objects::nonNull)
+            .collect(Collectors.joining(" "));//сделано без if
   }
 
   // словарь id персоны -> ее имя
@@ -76,6 +59,9 @@ public class Task9 {
     }
     return false; //если не нашли false
     // еще нашел такой метод return !Collections.disjoint(persons1, persons2);, но так вообще неинтересно
+    // Метод с disjoint работает быстрее, потому что он итерируется по меньшей коллекции в моем методе это не предусмотрено
+    // Про anyMath тоже посмотрел. Вот решение с помощью него return persons2.stream().anyMatch(persons1Set::contains);
+    // Но вот по скорости, как я понял они идентичны
 
   }
 
@@ -101,4 +87,14 @@ public class Task9 {
   // равен самому числу, поэтому все числа от 1 до 10000 попадают в уникальные бакеты,
   // индексы которых совпадают с числами. HashSet обходит бакеты по возрастанию индексов,
   // поэтому метод toString() возвращает числа в упорядоченном виде
+  // Пояснение:
+  // hashCode у Integer в Java возвращает само значение числа (hash(x) = x).
+  // HashSet базируется на HashMap. При создании сета из 10 000 элементов
+  // вычисляется необходимая емкость: 10 000 / 0.75 (load factor) ~ 13 333.
+  // Ближайшая степень двойки сверху — 16 384. Это и есть размер внутреннего массива.
+  // Индекс бакета вычисляется формулой (n - 1) & hash. Для всех чисел от 1 до 10 000
+  // результат операции 16383 & hash будет равен самому числу, так как они меньше 16 383.
+  // Итератор HashSet обходит массив бакетов строго по порядку индексов (от 0 до конца).
+  // Поскольку число 1 лежит в первом бакете, 2 - во втором и т.д., метод toString() выводит их в отсортированном виде.
+  // Надеюсь понятней стало
 }

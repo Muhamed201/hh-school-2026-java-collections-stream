@@ -18,11 +18,10 @@ public class Task2 {
   public static List<Person> combineAndSortWithLimit(Collection<Person> persons1,
                                                      Collection<Person> persons2,
                                                      int limit) {
-    // Если limit некорректен, сразу возвращаем пустой список
-    if (limit <= 0) {
-      return List.of();
+    // Если limit некорректен, сразу возвращаем исключение
+    if (limit < 0) {
+      throw new IllegalArgumentException("Limit can't be negative: " + limit);
     }
-
     // Объединяем потоки двух коллекций, сортируем по дате создания и ограничиваем количество
     return Stream.concat(persons1.stream(), persons2.stream())
             .sorted(Comparator.comparing(Person::createdAt))

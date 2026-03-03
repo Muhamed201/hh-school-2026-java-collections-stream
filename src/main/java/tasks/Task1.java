@@ -4,6 +4,7 @@ import common.Person;
 import common.PersonService;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 /*
 Задача 1
@@ -23,20 +24,12 @@ public class Task1 {
   public List<Person> findOrderedPersons(List<Integer> personIds) {
     Set<Person> persons = personService.findPersons(personIds);
 
-    // O(n) по времени, O(n) по памяти
-    Map<Integer, Person> personMap = new HashMap<>();
-    for (Person person : persons) {
-      personMap.put(person.id(), person);
-      System.out.println(person);
-    }
+    //Вот собрал через Map
+    Map<Integer, Person> personMap = persons.stream()
+            .collect(Collectors.toMap(Person::id, person -> person));
 
-    // Восстанавливаем порядок согласно personIds
-    // O(m) по времени, где m - размер personIds
-    List<Person> result = new ArrayList<>();
-    for (Integer id : personIds) {
-      Person person = personMap.get(id);
-    }
-
-    return result;
+    return personIds.stream()
+            .map(personMap::get)
+            .collect(Collectors.toList());
   }
 }
