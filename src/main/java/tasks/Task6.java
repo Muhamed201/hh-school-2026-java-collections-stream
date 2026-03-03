@@ -3,9 +3,11 @@ package tasks;
 import common.Area;
 import common.Person;
 import java.util.Collection;
-import java.util.HashSet;
+import java.util.Objects;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /*
 Имеются
@@ -19,6 +21,17 @@ public class Task6 {
   public static Set<String> getPersonDescriptions(Collection<Person> persons,
                                                   Map<Integer, Set<Integer>> personAreaIds,
                                                   Collection<Area> areas) {
-    return new HashSet<>();
+      Map<Integer, Area> areaById = areas.stream()
+              .collect(Collectors.toMap(Area::getId, area -> area));
+
+      return persons.stream()
+              .flatMap(person -> personAreaIds.getOrDefault(person.id(), Set.of()).stream()
+                      .map(areaById::get)
+                      .map(area -> person.firstName() + " - " + area.getName()))
+              .collect(Collectors.toSet());
+      //Такой код мне намного больше нравиться
+      //Я просто не привык, как то писать готовыми функциями
+      //До этого все сам прописывал
   }
 }
+
